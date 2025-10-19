@@ -1,0 +1,22 @@
+networks:
+  my-backend:
+    driver: bridge
+
+services:
+  backend-main:
+    build:
+      context: ./backend-main
+    ports:
+      - "5566:3456" 
+    networks:
+      - my-backend
+
+  backend-version:
+    build:
+      context: ./backend-version
+    networks:
+      - my-backend
+
+# helthcheck
+# postgres
+# nginx

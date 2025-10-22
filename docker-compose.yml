@@ -17,6 +17,22 @@ services:
     networks:
       - my-backend
 
+  db:
+    image: postgres:18.0
+    environment:
+      POSTGRES_PASSWORD: qwerty123
+      POSTGRES_USER: anar
+      POSTGRES_DB: lang_db
+    ports:
+      - "4444:5432"
+    networks:
+      - my-backend
+    volumes:
+      - ./anar-lang-db-postgres-data:/var/lib/postgresql/data
+      # - ./anar-lang-db-postgres-data:/var/lib/postgresql/data
+
+
+# chmod -R 777 ./anar-lang-db-postgres-data
 # helthcheck
 # postgres
 # nginx

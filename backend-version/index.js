@@ -1,9 +1,23 @@
 const express = require('express')
+const { Pool } = require('pg');
+
 const app = express()
 const port = 3456
 
-app.get('/version', (req, res) => {
-  res.send(process.versions.node);
+const client = new Pool({
+  user: "anar",
+  host: "db",
+  database: "lang_db",
+  port: "5432",
+  password: "qwerty123"
+});
+
+app.get('/version', async (req, res) => {
+
+  const result = await client.query("");
+  
+  // res.send(process.versions.node);
+  res.send(result.rows);
 })
 
 app.listen(port, () => {

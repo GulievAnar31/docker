@@ -8,6 +8,26 @@ app.get('/main', async (req, res) => {
   res.send("==== " + await resp.text());
 })
 
+app.get('/version', async (req, res) => {
+  try {
+    const resp = await fetch("http://backend-version:3456/version");
+    console.log("Proxying /version, status:", resp.status);
+    
+    if (!resp.ok) {
+      throw new Error(`Backend-version responded with status: ${resp.status}`);
+    }
+    
+    const data = await resp.json();
+    res.json(data);
+  } catch (error) {
+    console.error('Error proxying to backend-version:', error);
+    res.status(500).json({
+      error: 'Failed to fetch version from backend-version',
+      message: error.message
+    });
+  }
+})
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })

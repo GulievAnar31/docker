@@ -2,6 +2,9 @@ networks:
   my-backend:
     driver: bridge
 
+volumes:
+  postgres_data:
+
 services:
   backend-main:
     build:
@@ -10,12 +13,24 @@ services:
       - "5566:3456" 
     networks:
       - my-backend
+    depends_on:
+      backend-version:
+        condition: service_healthy
+
 
   backend-version:
     build:
       context: ./backend-version
     networks:
       - my-backend
+    healthcheck:
+      interval: 2s
+      timeout: 3s
+      retries: 5
+      start_period: 2s
+      # wget -qO- http://localhost:3456/health
+      # test: ["CMD", "curl", "-f", "http://localhost:3456/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:3456/health"]
 
   db:
     image: postgres:18.0
@@ -28,11 +43,38 @@ services:
     networks:
       - my-backend
     volumes:
-      - ./anar-lang-db-postgres-data:/var/lib/postgresql/data
-      # - ./anar-lang-db-postgres-data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+  
+  nginx:
+    # image: nginx
+    build:
+      context: .
+      dockerfile: infra/Dockerfile
+    ports:
+      - "1280:80"
+      - "12443:443"
+    networks:
+      - my-backend
+    # volumes:
+    #   - ./infra/conf:/etc/nginx/conf.d
+    #   - ./infra/static:/usr/share/nginx/html
 
+# cp -r ./vite-project/dist/* ./infra/static/
+# docker exec <nginx_container_id> nginx -s reload
+
+
+# сейчас всесто site.com будет localhost:7777 
+
+#  nginx  site.com/api/version → localhost:5566/version
+#         site.com (SPA react) → static files
+
+# https://stackoverflow.com/questions/73720063/docker-compose-keeps-running-healthcheck
 
 # chmod -R 777 ./anar-lang-db-postgres-data
 # helthcheck
 # postgres
 # nginx
+
+# создать SPA приложение на реакт (vite)
+# делеает запрос к localhost:5566/version через proxy localhost:5173/api/version
+# из useEffect и тупо в innerHTML выводит текст
